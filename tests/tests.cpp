@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+#include "dino.h"
 #include "game2048.h"
 #include "hangman.h"
 #include "tictactoe.h"
@@ -136,10 +137,36 @@ static void testHangman() {
     CHECK(game.won());
 }
 
+static void testDino() {
+    DinoGame game;
+    CHECK(game.alive());
+    CHECK(game.distanceToObstacle() == 32);
+    for (int i = 0; i < 31; ++i) CHECK(game.step(false));
+    CHECK(game.distanceToObstacle() == 1);
+    CHECK(game.step(true));
+    for (int i = 0; i < 5; ++i) CHECK(game.step(false));
+    CHECK(game.score() == 1);
+    CHECK(game.distanceToObstacle() == 31);
+
+    DinoGame crashed;
+    for (int i = 0; i < 32; ++i) crashed.step(false);
+    CHECK(!crashed.alive());
+    CHECK(crashed.score() == 0);
+
+    DinoGame timedJump;
+    for (int i = 0; i < 22; ++i) timedJump.step(false);
+    CHECK(timedJump.distanceToObstacle() == 10);
+    CHECK(timedJump.step(true));
+    for (int i = 0; i < 14; ++i) CHECK(timedJump.step(false));
+    CHECK(timedJump.alive());
+    CHECK(timedJump.score() == 1);
+}
+
 int main() {
     testTicTacToe();
     test2048();
     testHangman();
+    testDino();
     if (failures == 0) std::cout << "All tests passed.\n";
     return failures == 0 ? 0 : 1;
 }

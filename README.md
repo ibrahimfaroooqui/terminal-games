@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, and hangman in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, and a dinosaur runner in the terminal. Written in C++17.
 
 ## Running it
 
@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Anything other than 1 to 4, including letters, prints an error and asks again.
+- Anything other than 1 to 5, including letters, prints an error and asks again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.
@@ -34,6 +34,11 @@ Tic-tac-toe
 Hangman
 - Upper and lower case letters count as the same guess.
 - A wrong guess costs a life, repeating a guess costs nothing. You get 6 lives.
+
+Dinosaur Run
+- The dinosaur and short cactus move continuously. Press Space, `w`, or `j` to jump without pressing Enter.
+- The game ends if you reach a cactus without jumping. Press `q` to return to the menu.
+- Your score increases for every cactus cleared.
 
 ## Code
 
