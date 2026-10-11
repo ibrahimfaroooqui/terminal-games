@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, hangman, and a dinosaur runner in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, and a dinosaur run in the terminal. Written in C++17.
 
 ## Running it
 
@@ -35,7 +35,7 @@ Hangman
 - Upper and lower case letters count as the same guess.
 - A wrong guess costs a life, repeating a guess costs nothing. You get 6 lives.
 
-Dinosaur Run (like Chrome's offline dinosaur game)
+Dinosaur Run
 - Space or Up jumps, Down ducks, `q` returns to the menu. No Enter needed.
 - Cacti and pterodactyls come at you and the game keeps getting faster. Hitting one ends the run.
 - Jump low birds, duck under middle ones, and run under high ones.
