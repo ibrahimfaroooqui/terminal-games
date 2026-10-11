@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 #include "dino.h"
 #include "game2048.h"
@@ -15,7 +16,19 @@ int main() {
                   << "5. Quit\n"
                   << "Pick a game: ";
         int choice = 0;
-        std::cin >> choice;
+
+        if (!(std::cin >> choice)) {
+            if (std::cin.eof()) {
+                return 0;
+            }
+
+            std::cin.clear();
+            std::cin.ignore(
+                std::numeric_limits<std::streamsize>::max(), '\n');
+
+            std::cout << "Please enter a valid number.\n";
+            continue;
+        }
         switch (choice) {
             case 1: play2048(); break;
             case 2: playTicTacToe(); break;
