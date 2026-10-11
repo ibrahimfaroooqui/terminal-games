@@ -35,15 +35,16 @@ Hangman
 - Upper and lower case letters count as the same guess.
 - A wrong guess costs a life, repeating a guess costs nothing. You get 6 lives.
 
-Dinosaur Run
-- The dinosaur and short cactus move continuously. Press Space, `w`, or `j` to jump without pressing Enter.
-- The game ends if you reach a cactus without jumping. Press `q` to return to the menu.
-- Your score increases for every cactus cleared.
+Dinosaur Run (like Chrome's offline dinosaur game, details in [DINO_README.md](DINO_README.md))
+- Space or Up jumps, Down ducks, `q` returns to the menu. No Enter needed.
+- Cacti and pterodactyls come at you and the game keeps getting faster. Hitting one ends the run.
+- Jump low birds, duck under middle ones, and run under high ones.
+- Space restarts after a crash. The high score is kept until you quit the program.
 
 ## Code
 
 - `src/main.cpp`: the menu
-- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`: the games
+- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/dino.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
 
 ## Contributing
