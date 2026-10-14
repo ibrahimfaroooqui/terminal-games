@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, hangman, and snake in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, Snake, and a dinosaur runner in the terminal. Written in C++17.
 
 ## Running it
 
@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Anything other than 1 to 5, including letters, prints an error and asks again.
+- Anything other than 1 to 6, including letters, prints an error and asks again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.
@@ -41,10 +41,16 @@ Snake (arrow keys or `w a s d` to steer, `q` to quit)
 - The snake wraps around all boundaries (passing through one side brings you out the opposite side).
 - The game ends if the snake runs into its own body.
 
+Dinosaur Run (like Chrome's offline dinosaur game)
+- Space or Up jumps, Down ducks, `q` returns to the menu. No Enter needed.
+- Cacti and pterodactyls come at you and the game keeps getting faster. Hitting one ends the run.
+- Jump low birds, duck under middle ones, and run under high ones.
+- Space restarts after a crash. The high score is kept until you quit the program.
+
 ## Code
 
 - `src/main.cpp`: the menu
-- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`: the games
+- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
 
 ## Contributing
