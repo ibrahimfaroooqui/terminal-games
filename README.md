@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, hangman, Snake, Blackjack, and a dinosaur runq in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, Snake, Blackjack, and a dinosaur run in the terminal. Written in C++17.
 
 ## Running it
 
