@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 
+#include "blackjack.h"
 #include "dino.h"
 #include "game2048.h"
 #include "hangman.h"
@@ -15,7 +16,8 @@ int main() {
                   << "3. Hangman\n"
                   << "4. Snake\n"
                   << "5. Dinosaur Run\n"
-                  << "6. Quit\n"
+                  << "6. Blackjack\n"
+                  << "7. Quit\n"
                   << "Pick a game: ";
         int choice = 0;
 
@@ -37,8 +39,9 @@ int main() {
             case 3: playHangman(); break;
             case 4: playSnake(); break;
             case 5: playDino(); break;
-            case 6: std::cout << "Bye!\n"; return 0;
-            default: std::cout << "Please pick 1, 2, 3, 4, 5 or 6.\n";
+            case 6: playBlackjack(); break;
+            case 7: std::cout << "Bye!\n"; return 0;
+            default: std::cout << "Please pick 1, 2, 3, 4, 5, 6 or 7.\n";
         }
     }
 }

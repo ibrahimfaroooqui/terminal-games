@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include "blackjack.h"
 #include "dino.h"
 #include "game2048.h"
 #include "hangman.h"
@@ -138,6 +139,89 @@ static void testHangman() {
     CHECK(game.masked() == "g _ _ _ _ _");
     for (char c : std::string("ithub")) game.guess(c);
     CHECK(game.won());
+}
+
+static void testBlackjack() {
+    CHECK(Card(Suit::Hearts, Rank::Ace).value() == 11);
+    CHECK(Card(Suit::Clubs, Rank::King).value() == 10);
+    CHECK(Card(Suit::Diamonds, Rank::Seven).rankText() == "7");
+
+    Hand soft;
+    soft.add(Card(Suit::Spades, Rank::Ace));
+    soft.add(Card(Suit::Hearts, Rank::Six));
+    CHECK(soft.total() == 17);
+    CHECK(soft.isSoft());
+    soft.add(Card(Suit::Clubs, Rank::Nine));
+    CHECK(soft.total() == 16);
+    CHECK(!soft.isSoft());
+
+    Hand natural;
+    natural.add(Card(Suit::Spades, Rank::Ace));
+    natural.add(Card(Suit::Diamonds, Rank::King));
+    CHECK(natural.total() == 21);
+    CHECK(natural.isBlackjack());
+
+    Hand multiAce;
+    multiAce.add(Card(Suit::Spades, Rank::Ace));
+    multiAce.add(Card(Suit::Hearts, Rank::Ace));
+    multiAce.add(Card(Suit::Clubs, Rank::Nine));
+    CHECK(multiAce.total() == 21);
+    CHECK(multiAce.isSoft());
+    CHECK(!multiAce.isBlackjack());
+
+    Deck shoe(42);
+    CHECK(shoe.size() == 312);
+    CHECK(shoe.remaining() == 312);
+    std::array<std::array<int, 13>, 4> cardCounts{};
+    for (int i = 0; i < 312; ++i) {
+        const Card card = shoe.draw();
+        ++cardCounts[static_cast<int>(card.suit())][static_cast<int>(card.rank()) - 2];
+    }
+    CHECK(shoe.remaining() == 0);
+    for (int suit = 0; suit < 4; ++suit)
+        for (int rank = 0; rank < 13; ++rank)
+            CHECK(cardCounts[suit][rank] == 6);
+
+    Deck penetration(42);
+    for (int i = 0; i < 234; ++i) penetration.draw();
+    CHECK(penetration.remaining() == 78);
+    CHECK(!penetration.needsShuffle());
+    penetration.draw();
+    CHECK(penetration.remaining() == 77);
+    CHECK(penetration.needsShuffle());
+    penetration.prepareForRound();
+    CHECK(penetration.remaining() == 312);
+    CHECK(!penetration.needsShuffle());
+
+    CHECK(BlackjackGame::returnFor(BlackjackResult::Blackjack, 1000) == 2500);
+    CHECK(BlackjackGame::returnFor(BlackjackResult::PlayerWin, 1000) == 2000);
+    CHECK(BlackjackGame::returnFor(BlackjackResult::Push, 1000) == 1000);
+    CHECK(BlackjackGame::returnFor(BlackjackResult::DealerWin, 1000) == 0);
+
+    BlackjackGame game(7);
+    CHECK(game.bankrollCents() == BlackjackGame::kStartingBankrollCents);
+    CHECK(!game.startRound(9));
+    CHECK(!game.startRound(1001));
+    CHECK(game.bankrollCents() == BlackjackGame::kStartingBankrollCents);
+    CHECK(game.startRound(10));
+    CHECK(game.wagerCents() == 1000);
+    CHECK(game.bankrollCents() == 99000 || game.roundComplete());
+    if (game.playerTurn()) {
+        CHECK(game.canDoubleDown());
+        CHECK(game.doubleDown());
+        CHECK(game.wagerCents() == 2000);
+        CHECK(!game.playerTurn());
+        CHECK(!game.canDoubleDown());
+        while (game.dealerTurn()) game.dealerStep();
+        CHECK(game.roundComplete());
+    }
+
+    BlackjackGame allIn(9);
+    CHECK(allIn.startRound(1000));
+    if (allIn.playerTurn()) {
+        CHECK(!allIn.canDoubleDown());
+        CHECK(!allIn.doubleDown());
+    }
 }
 
 // A simple autopilot: jumps cacti and low birds, ducks mid-height birds.
@@ -375,6 +459,7 @@ int main() {
     testTicTacToe();
     test2048();
     testHangman();
+    testBlackjack();
     testDino();
     testSnake();
     if (failures == 0) std::cout << "All tests passed.\n";

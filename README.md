@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, hangman, Snake, and a dinosaur runner in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, Snake, Blackjack, and a dinosaur runq in the terminal. Written in C++17.
 
 ## Running it
 
@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Anything other than 1 to 6, including letters, prints an error and asks again.
+- Choose 1–6 for a game or 7 to quit. Invalid entries print an error and ask again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.
@@ -47,10 +47,17 @@ Dinosaur Run (like Chrome's offline dinosaur game)
 - Jump low birds, duck under middle ones, and run under high ones.
 - Space restarts after a crash. The high score is kept until you quit the program.
 
+Blackjack
+- Start with $1,000; wagers are $10 or more, up to your available bankroll.
+- Hover over and click the $10, $25, $50, or $100 chips to build a wager; keys `1`–`4` work as a keyboard alternative. Backspace removes the last chip, `c` clears the bet, and Enter deals.
+- Hover over and click Hit, Stand, or Double Down; press `H`, `S`, or `D` as a keyboard alternative. Double Down is available on the first two cards when you can match the wager. The dealer hits through 16 and stands on all 17s.
+- A natural Blackjack pays 3:2; a regular win pays 1:1, and a tie returns the wager.
+- Press `q` at the wager prompt or after a round to return to the menu.
+
 ## Code
 
 - `src/main.cpp`: the menu
-- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`: the games
+- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
 
 ## Contributing
