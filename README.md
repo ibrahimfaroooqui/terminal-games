@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Choose 1–6 for a game or 7 to quit. Invalid entries print an error and ask again.
+- Choose 1–7 for a game or 8 to quit. Invalid entries print an error and ask again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.
@@ -54,10 +54,15 @@ Blackjack
 - A natural Blackjack pays 3:2; a regular win pays 1:1, and a tie returns the wager.
 - Press `q` at the wager prompt or after a round to return to the menu.
 
+Tetris (arrow keys or `a d s`, `x`, `z`, `Space`, `c`, `p`, `q`)
+- Move, rotate, soft drop, hard drop, and hold falling tetrominoes to clear lines.
+- Clear more lines at once for a higher score; every 10 lines advances the level and speeds up gravity.
+- Press `q` or Escape to return to the menu.
+
 ## Code
 
 - `src/main.cpp`: the menu
-- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`: the games
+- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`, `src/tetris.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
 
 ## Contributing
