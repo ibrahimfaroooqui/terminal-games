@@ -1,6 +1,6 @@
 # terminal-games
 
-2048, tic-tac-toe against the computer, hangman, Snake, Blackjack, and a dinosaur run in the terminal. Written in C++17.
+2048, tic-tac-toe against the computer, hangman, Snake, Blackjack, Tetris, Space Invaders, and a dinosaur run in the terminal. Written in C++17.
 
 ## Running it
 
@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Choose 1–6 for a game or 7 to quit. Invalid entries print an error and ask again.
+- Choose a numbered game card, `0` to change menu page when available, or the displayed Quit option. Invalid entries print an error and ask again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.
@@ -62,10 +62,15 @@ Space Invaders (arrow keys or `a`/`d` to steer, Space or `w`/Up to shoot, `q` to
 - Alien fleet shifts and descends whenever reaching the borders; movement speed accelerates as alien numbers diminish.
 - Clear all invaders to advance to the next level. The game ends if all lives are lost or invaders descend to bunker/cannon level.
 
+Tetris (arrow keys or `a d s`, `x`, `z`, `Space`, `c`, `p`, `q`)
+- Move, rotate, soft drop, hard drop, and hold falling tetrominoes to clear lines.
+- Clear more lines at once for a higher score; every 10 lines advances the level and speeds up gravity.
+- Press `q` or Escape to return to the menu.
+
 ## Code
 
 - `src/main.cpp`: the menu
-- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`: the games
+- `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`, `src/tetris.*`, `src/spaceinvaders.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
 - `src/intro.*`: Borderland startup animation, scalable trial card rendering, and theme menu
 - `src/spaceinvaders.*`: Space Invaders arcade game logic and renderer
