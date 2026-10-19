@@ -35,9 +35,10 @@ Hangman
 - Upper and lower case letters count as the same guess.
 - A wrong guess costs a life, repeating a guess costs nothing. You get 6 lives.
 
-Snake (arrow keys or `w a s d` to steer, `q` to quit)
-- Control the snake to eat food (`*`) and grow. Each food eaten adds 10 to the score.
-- Steer with the arrow keys or `w` (up), `a` (left), `s` (down), `d` (right).
+Snake (arrow keys or `w a s d` to steer, `p` to pause, `q` to quit)
+- Interactive retro title screen with animated falling snake cascade matrix.
+- Arcade Mode: expanded textured arena, multiple food targets (`$`), session high-score tracking, and dynamic speed levels (1 to 9).
+- Steer with arrow keys or `w` (up), `a` (left), `s` (down), `d` (right).
 - The snake wraps around all boundaries (passing through one side brings you out the opposite side).
 - The game ends if the snake runs into its own body.
 
@@ -59,6 +60,7 @@ Blackjack
 - `src/main.cpp`: the menu
 - `src/game2048.*`, `src/tictactoe.*`, `src/hangman.*`, `src/snake.*`, `src/dino.*`, `src/blackjack.*`: the games
 - `tests/tests.cpp`: tests, using a small `CHECK` macro
+- `src/intro.*`: Borderland startup animation, scalable trial card rendering, and theme menu
 
 ## Contributing
 
