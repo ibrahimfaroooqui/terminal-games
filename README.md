@@ -18,7 +18,7 @@ Run `cmake --build build` again after every change.
 ## How it's supposed to work
 
 Menu
-- Choose a numbered game card, `0` to change menu page when available, or the displayed Quit option. Invalid entries print an error and ask again.
+- Choose a numbered game card, `0` to change menu page when available, or the displayed Quit option. In the current 8-game menu, Tetris is 7, Space Invaders is 8, and Quit is 9. Invalid entries print an error and ask again.
 
 2048 (`w a s d` to move, `u` to undo)
 - Tiles slide as far as they can. Equal tiles that meet merge, and a tile only merges once per move: `2 2 2 2` moved left is `4 4 _ _`.

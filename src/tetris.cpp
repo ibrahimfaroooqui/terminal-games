@@ -6,13 +6,27 @@
 #include <cctype>
 #include <cerrno>
 #include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <string>
+#include <utility>
+
+#ifdef _WIN32
+#include <conio.h>
+#include <io.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+#else
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h>
-#include <utility>
+#endif
 
 namespace {
 using Cells = std::array<TetrisPoint, 4>;
@@ -339,7 +353,9 @@ namespace {
 constexpr int BOARD_LEFT_WIDTH = 28;
 constexpr int FRAME_ROWS = TetrisGame::VISIBLE_HEIGHT + 2;
 constexpr int FRAME_TICK_MICROSECONDS = 1000000 / 60;
+#ifndef _WIN32
 constexpr int ESCAPE_SEQUENCE_TICKS = 6;
+#endif
 constexpr int PIECE_COLORS[] = {51, 226, 165, 46, 196, 27, 208};
 constexpr int GHOST_COLORS[] = {239, 242, 239, 238, 239, 240, 238};
 
@@ -511,9 +527,49 @@ std::string makeFrame(const TetrisGame& game, int highScore, bool paused) {
     return frame;
 }
 
+bool writeTerminal(const std::string& text) {
+#ifdef _WIN32
+    DWORD written = 0;
+    const HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    return WriteFile(output, text.data(), static_cast<DWORD>(text.size()),
+                     &written, nullptr) &&
+           static_cast<std::size_t>(written) == text.size();
+#else
+    const ssize_t written = ::write(STDOUT_FILENO, text.data(), text.size());
+    return written >= 0 && static_cast<std::size_t>(written) == text.size();
+#endif
+}
+
 class TetrisTerminal {
 public:
     bool start() {
+#ifdef _WIN32
+        if (!_isatty(_fileno(stdin)) || !_isatty(_fileno(stdout))) {
+            std::cerr << "Tetris needs an interactive terminal.\n";
+            return false;
+        }
+        inputHandle_ = GetStdHandle(STD_INPUT_HANDLE);
+        outputHandle_ = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (!GetConsoleMode(inputHandle_, &originalInputMode_) ||
+            !GetConsoleMode(outputHandle_, &originalOutputMode_)) {
+            std::cerr << "Unable to read Windows console settings.\n";
+            return false;
+        }
+        const DWORD inputMode = originalInputMode_ &
+            ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+        if (!SetConsoleMode(inputHandle_, inputMode)) {
+            std::cerr << "Unable to enable Windows console input.\n";
+            return false;
+        }
+        inputModeReady_ = true;
+        if (!SetConsoleMode(outputHandle_,
+                            originalOutputMode_ | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
+            std::cerr << "Unable to enable ANSI terminal output.\n";
+            return false;
+        }
+        outputModeReady_ = true;
+        active_ = true;
+#else
         if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
             std::cerr << "Tetris needs an interactive terminal.\n";
             return false;
@@ -533,9 +589,9 @@ public:
             return false;
         }
         active_ = true;
+#endif
         const char* enterScreen = "\033[?1049h\033[?25l\033[?7l\033[2J\033[H";
-        const std::size_t length = std::char_traits<char>::length(enterScreen);
-        if (::write(STDOUT_FILENO, enterScreen, length) != static_cast<ssize_t>(length)) {
+        if (!writeTerminal(enterScreen)) {
             std::cerr << "Unable to initialize terminal display.\n";
             return false;
         }
@@ -545,29 +601,61 @@ public:
     ~TetrisTerminal() {
         if (active_) {
             const char* leaveScreen = "\033[?7h\033[?25h\033[?1049l";
-            const std::size_t length = std::char_traits<char>::length(leaveScreen);
-            if (::write(STDOUT_FILENO, leaveScreen, length) != static_cast<ssize_t>(length)) {
+            if (!writeTerminal(leaveScreen)) {
                 std::cerr << "Unable to restore terminal display.\n";
             }
         }
+#ifdef _WIN32
+        if (outputModeReady_ &&
+            !SetConsoleMode(outputHandle_, originalOutputMode_)) {
+            std::cerr << "Unable to restore Windows console output settings.\n";
+        }
+        if (inputModeReady_ &&
+            !SetConsoleMode(inputHandle_, originalInputMode_)) {
+            std::cerr << "Unable to restore Windows console input settings.\n";
+        }
+#else
         if (termiosReady_ && tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_) != 0) {
             std::cerr << "Unable to restore terminal settings.\n";
         }
+#endif
     }
 
 private:
+#ifdef _WIN32
+    HANDLE inputHandle_ = INVALID_HANDLE_VALUE;
+    HANDLE outputHandle_ = INVALID_HANDLE_VALUE;
+    DWORD originalInputMode_ = 0;
+    DWORD originalOutputMode_ = 0;
+    bool inputModeReady_ = false;
+    bool outputModeReady_ = false;
+#else
     termios original_{};
     bool termiosReady_ = false;
+#endif
     bool active_ = false;
 };
 
 bool terminalIsLargeEnough() {
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO info{};
+    const HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (!GetConsoleScreenBufferInfo(output, &info)) {
+        std::cerr << "Unable to determine terminal size for Tetris.\n";
+        return false;
+    }
+    const int columns = info.srWindow.Right - info.srWindow.Left + 1;
+    const int rows = info.srWindow.Bottom - info.srWindow.Top + 1;
+#else
     winsize size{};
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) != 0) {
         std::cerr << "Unable to determine terminal size for Tetris.\n";
         return false;
     }
-    if (size.ws_col < 80 || size.ws_row < 24) {
+    const int columns = size.ws_col;
+    const int rows = size.ws_row;
+#endif
+    if (columns < 80 || rows < 24) {
         std::cerr << "Terminal is too small for Tetris; use at least 80 columns by 24 rows.\n";
         return false;
     }
@@ -585,8 +673,11 @@ void playTetris() {
     TetrisGame game;
     bool paused = false;
     bool quit = false;
+    bool redraw = true;
+#ifndef _WIN32
     int escapeState = 0;
     int escapeTicks = 0;
+#endif
     auto nextTick = std::chrono::steady_clock::now() +
                     std::chrono::microseconds(FRAME_TICK_MICROSECONDS);
 
@@ -620,7 +711,30 @@ void playTetris() {
         }
     };
 
+    auto handleArrow = [&](int key) {
+        if (paused || game.isGameOver()) return;
+        switch (key) {
+            case 72: game.rotateClockwise(); break;
+            case 80: game.softDrop(); break;
+            case 77: game.moveRight(); break;
+            case 75: game.moveLeft(); break;
+        }
+    };
+
     while (!quit) {
+#ifdef _WIN32
+        if (_kbhit()) {
+            const int key = _getch();
+            if (key == 0 || key == 224) {
+                handleArrow(_getch());
+            } else {
+                handleKey(static_cast<unsigned char>(key));
+            }
+            redraw = true;
+        } else {
+            Sleep(1);
+        }
+#else
         fd_set readSet;
         FD_ZERO(&readSet);
         FD_SET(STDIN_FILENO, &readSet);
@@ -638,6 +752,7 @@ void playTetris() {
             return;
         }
         if (ready > 0 && FD_ISSET(STDIN_FILENO, &readSet)) {
+            redraw = true;
             unsigned char input[64];
             const ssize_t count = read(STDIN_FILENO, input, sizeof(input));
             if (count < 0 && errno != EINTR) {
@@ -669,22 +784,26 @@ void playTetris() {
                 }
             }
         }
+#endif
 
         const auto afterInput = std::chrono::steady_clock::now();
         while (afterInput >= nextTick) {
             nextTick += std::chrono::microseconds(FRAME_TICK_MICROSECONDS);
+#ifndef _WIN32
             if (escapeState == 1 && ++escapeTicks >= ESCAPE_SEQUENCE_TICKS) quit = true;
+#endif
             if (!paused && !game.isGameOver()) game.tick();
             sessionHighScore = std::max(sessionHighScore, game.score());
+            redraw = true;
         }
 
-        if (!quit) {
+        if (!quit && redraw) {
             const std::string frame = makeFrame(game, sessionHighScore, paused);
-            const ssize_t written = ::write(STDOUT_FILENO, frame.data(), frame.size());
-            if (written < 0 || static_cast<std::size_t>(written) != frame.size()) {
+            if (!writeTerminal(frame)) {
                 std::cerr << "Unable to draw Tetris frame.\n";
                 return;
             }
+            redraw = false;
         }
     }
 }
